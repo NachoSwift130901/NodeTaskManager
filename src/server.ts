@@ -6,7 +6,7 @@ import {
   createTask,
   markTaskDone,
   deleteTask
-} from './taskController';
+} from './controllers/taskController';
 
 const app = express();
 const PORT = 3000;
