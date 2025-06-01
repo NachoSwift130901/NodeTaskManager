@@ -4,7 +4,8 @@
   "description": "A task manager using nodeJS",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node tasks-api/server.js",
+    "dev": "nodemon tasks-api/server.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,8 @@
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
