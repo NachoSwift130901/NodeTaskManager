@@ -4,8 +4,8 @@
   "description": "A task manager using nodeJS",
   "main": "index.js",
   "scripts": {
-    "start": "node tasks-api/server.js",
-    "dev": "nodemon tasks-api/server.js"
+    "start": "tsc && node dist/server.js",
+    "dev": "ts-node-dev --respawn src/server.ts"
   },
   "repository": {
     "type": "git",
@@ -18,12 +18,15 @@
     "url": "https://github.com/NachoSwift130901/NodeTaskManager/issues"
   },
   "homepage": "https://github.com/NachoSwift130901/NodeTaskManager#readme",
-  "dependencies": {
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.29",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.10"
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
   }
 }
