@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger';
 import {
   getAllTasks,
   createTask,
@@ -17,6 +19,8 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/tasks', getAllTasks);
 app.post('/tasks', createTask);
