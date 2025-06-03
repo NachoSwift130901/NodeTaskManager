@@ -5,8 +5,12 @@ import {
   getAllTasks,
   createTask,
   markTaskDone,
-  deleteTask
+  deleteTask,
 } from './controllers/taskController';
+
+import {
+  getProjects
+} from './controllers/projectController'
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +22,8 @@ app.get('/tasks', getAllTasks);
 app.post('/tasks', createTask);
 app.put('/tasks/:id', markTaskDone); 
 app.delete('/tasks/:id', deleteTask);
+
+app.get('/projects', getProjects)
 
 
 app.listen(PORT, () => {
