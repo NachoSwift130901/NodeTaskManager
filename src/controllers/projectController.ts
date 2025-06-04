@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import * as projectService from '../services/projectService'
 import { Project } from '../models/Project';
 
@@ -96,45 +96,20 @@ export function createProjectController(req: Request<{}, {}, Pick<Project, 'name
  *     responses:
  *       200:
  *         description: Project updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Project'
  *       404:
  *         description: Project not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
  *       400:
  *         description: Bad request, missing project ID or name
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
  *       500:
  *         description: Failed to update project
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
  */
 export function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' | 'name'>>, res: Response<Project | { error: string }>): void {
-    const { id, name} = req.body;
+    const { id, name } = req.body;
     if (!id || !name) {
         res.status(400).json({ error: 'Project ID and name are required' })
         return
     }
-    const updatedProject: Project = { id,name,};
+    const updatedProject: Project = { id, name, };
 
     try {
         const project = projectService.updateProject(updatedProject);
@@ -145,5 +120,44 @@ export function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' 
         res.json(project);
     } catch (error) {
         res.status(500).json({ error: 'Failed to update project' });
+    }
+}
+
+
+/**
+ *  @swagger
+ * /projects/{id}:
+ *   delete:
+ *      summary: Delete a project by ID
+ *      tags:
+ *      - Projects
+ *      parameters:  
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: The ID of the project to delete
+ *      responses:
+ *          200:
+ *              description: Project deleted successfully
+ *          404:
+ *              description: Project not found
+ *          500: 
+ *              description: Failed to delete project
+ * */
+export function deleteProjectController(req: Request<{ id: string }>, res: Response<Project | { error: string }>) {
+    const { id } = req.params;
+    if (!id) {
+        res.status(400).json({ error: 'Project ID is required' });
+        return;
+    }
+    try {
+        const deletedProject = projectService.deleteProject(id);
+        if (!deletedProject) {
+            res.status(404).json({ error: 'Project not found' });
+            return;
+        }
+        res.json(deletedProject);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete project' });
     }
 }

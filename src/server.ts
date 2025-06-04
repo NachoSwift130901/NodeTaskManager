@@ -13,7 +13,8 @@ import {
 import {
   getProjectsController,
   createProjectController,
-  updateProjectController
+  updateProjectController,
+  deleteProjectController
 } from './controllers/projectController'
 
 
@@ -33,6 +34,7 @@ app.delete('/tasks/:id', deleteTaskController)
 app.get('/projects', getProjectsController)
 app.post('/projects', createProjectController)
 app.put('/projects', updateProjectController)
+app.delete('/projects/:id', deleteProjectController)
 
 
 app.listen(PORT, () => {
