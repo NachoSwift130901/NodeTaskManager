@@ -13,7 +13,7 @@ import { Task } from '../models/types';
  *       200:
  *         description: Task list
  */
-export function getAllTasks(req: Request, res: Response<Task[] | { error: string }>): void {
+export function getAllTasksController(req: Request, res: Response<Task[] | { error: string }>): void {
   try {
     const tasks = taskService.getTasks();
     res.json(tasks);
@@ -44,7 +44,7 @@ export function getAllTasks(req: Request, res: Response<Task[] | { error: string
  *       201:
  *         description: Task created
  */
-export function createTask(req: Request<{}, {}, Pick<Task, 'description'>>, res: Response<Task | { error: string }>): void {
+export function createTaskController(req: Request<{}, {}, Pick<Task, 'description'>>, res: Response<Task | { error: string }>): void {
   try {
     const { description } = req.body;
     if (!description) {
@@ -77,7 +77,7 @@ export function createTask(req: Request<{}, {}, Pick<Task, 'description'>>, res:
  *       404:
  *         description: Tarea not completed
  */
-export function markTaskDone(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
+export function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
   try {
     const task = taskService.markTaskDone(req.params.id);
     if (!task) {
@@ -109,7 +109,7 @@ export function markTaskDone(req: Request<{ id: string }>, res: Response<Task | 
  *       404:
  *         description: Task not found
  */
-export function deleteTask(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
+export function deleteTaskController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
   try {
     const deleted = taskService.removeTask(req.params.id);
     if (!deleted) {
