@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { Task } from '../models/types';
+import { Task } from '../models/task';
+import { PrismaClient } from '../generated/prisma';
 
 const filePath = path.join(__dirname, '..', 'tasks.json');
+
+const prisma = new PrismaClient()
 
 function loadTasks(): Task[] {
   if (!fs.existsSync(filePath)) return [];
@@ -15,20 +18,42 @@ function saveTasks(tasks: Task[]): void {
   fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2));
 }
 
-export function getTasks(): Task[] {
-  return loadTasks();
+export async function getTasks(): Promise<Task[]> {
+  try {
+    const tasks = await prisma.task.findMany({
+      orderBy: {
+        createdAt: 'desc', // Optional: sort by newest first
+      },
+    });
+    return tasks;
+  } catch (error) {
+    console.error('Failed to fetch tasks:', error);
+    throw new Error('Failed to fetch tasks from database');
+  }
 }
 
-export function createTask(description: string): Task  {
-  const tasks = loadTasks();
-  const newTask: Task = {
+export async function createTask(description: string): Promise<Task> {
+  const newTask = {
     id: Date.now().toString(),
-    description: description,
+    description,
     completed: false,
+    createdAt: new Date(),
   };
-  tasks.push(newTask);
-  saveTasks(tasks);
-  return newTask;
+
+  try {
+    const createdTask = await prisma.task.create({
+      data: {
+        id: newTask.id,
+        description: newTask.description,
+        completed: newTask.completed,
+        createdAt: newTask.createdAt,
+      },
+    });
+    return createdTask;
+  } catch (error) {
+    console.error('Failed to create task:', error);
+    throw new Error('Database operation failed');
+  }
 }
 
 export function markTaskDone(id: string): Task | null {

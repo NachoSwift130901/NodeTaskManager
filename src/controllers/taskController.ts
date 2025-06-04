@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as taskService from '../services/taskService';
-import { Task } from '../models/types';
+import { Task } from '../models/task';
 
 /**
  * @swagger
@@ -13,9 +13,9 @@ import { Task } from '../models/types';
  *       200:
  *         description: Task list
  */
-export function getAllTasksController(req: Request, res: Response<Task[] | { error: string }>): void {
+export async function getAllTasksController(req: Request, res: Response<Task[] | { error: string }>): Promise<void> {
   try {
-    const tasks = taskService.getTasks();
+    const tasks = await taskService.getTasks();
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: 'Failed to load tasks' });
@@ -44,17 +44,17 @@ export function getAllTasksController(req: Request, res: Response<Task[] | { err
  *       201:
  *         description: Task created
  */
-export function createTaskController(req: Request<{}, {}, Pick<Task, 'description'>>, res: Response<Task | { error: string }>): void {
+export async function createTaskController(req: Request<{}, {}, Pick<Task, 'description'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
     const { description } = req.body;
     if (!description) {
-      res.status(400).json({ error: 'Descripción requerida' });
+      res.status(400).json({ error: 'Description required' });
       return;
     }
-    const newTask = taskService.createTask(description);
+    const newTask = await taskService.createTask(description);
     res.status(201).json(newTask);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create task' });
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to create task'  });
   }
 }
 
