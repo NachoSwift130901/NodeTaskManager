@@ -2,14 +2,17 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { Project } from '../models/project';
+import { PrismaClient } from '../generated/prisma';
 
 
 const filePath = path.join(__dirname, '..', 'projects.json');
 
+const prisma = new PrismaClient()
+
 function loadProjects(): Project[] {
-  if (!fs.existsSync(filePath)) return [];
-  const data = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(data) as Project[];
+    if (!fs.existsSync(filePath)) return [];
+    const data = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(data) as Project[];
 }
 
 function saveProjects(projects: Project[]): void {
@@ -17,19 +20,32 @@ function saveProjects(projects: Project[]): void {
 }
 
 
-export function getProjects(): Project[] {
-    return loadProjects()
+export async function getProjects(): Promise<Project[]> {
+    try {
+        const projects = await prisma.project.findMany({
+            orderBy: {
+                name: 'asc', // Optional: sort by name alphabetically
+            },
+        });
+        return projects;
+    } catch (error) {
+        console.error('Failed to fetch projects:', error);
+        throw new Error('Failed to fetch projects from database');
+    }
 }
 
-export function addProject(project: string): Project {
-    const projects = loadProjects();
-    const newProject: Project = {
-        name: project,
-        id: Date.now().toString() // Generate a unique ID based on timestamp
-    };
-    projects.push(newProject);
-    saveProjects(projects);
-    return newProject;
+export async function addProject(project: string): Promise<Project> {
+    try {
+        const createdProject = await prisma.project.create({
+            data: {
+                name: project,
+            },
+        });
+        return createdProject;
+    } catch (error) {
+        console.error('Failed to create project:', error);
+        throw new Error('Database operation failed');
+    }
 }
 
 export function getProjectById(id: string): Project | null {

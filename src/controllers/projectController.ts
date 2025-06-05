@@ -28,9 +28,9 @@ import { Project } from '../models/project';
  *                 error:
  *                   type: string
  */
-export function getProjectsController(req: Request, res: Response<Project[] | { error: string }>) {
+export async function getProjectsController(req: Request, res: Response<Project[] | { error: string }>) {
     try {
-        const projects = projectService.getProjects()
+        const projects = await projectService.getProjects()
         res.json(projects)
     } catch (error) {
         res.status(500).json({ error: 'Failed to load projects' });
@@ -59,14 +59,14 @@ export function getProjectsController(req: Request, res: Response<Project[] | { 
  *       201:
  *         name: Project created
  */
-export function createProjectController(req: Request<{}, {}, Pick<Project, 'name'>>, res: Response<Project | { error: string }>) {
+export async function createProjectController(req: Request<{}, {}, Pick<Project, 'name'>>, res: Response<Project | { error: string }>) {
     try {
         const { name } = req.body;
         if (!name) {
             res.status(400).json({ error: 'Project name is required' });
             return;
         }
-        const newProject = projectService.addProject(name);
+        const newProject = await projectService.addProject(name);
         res.status(201).json(newProject);
     } catch (error) {
         res.status(500).json({ error: 'Failed to create project' });
