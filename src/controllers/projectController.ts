@@ -16,8 +16,6 @@ import { Project } from '../models/project';
  *           application/json:
  *             schema:
  *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Project'
  *       500:
  *         description: Failed to load projects
  *         content:
