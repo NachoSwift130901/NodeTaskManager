@@ -14,9 +14,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Project {
+  id    String  @id @default(uuid())
+  name  String
+  tasks Task[]  @relation("ProjectTasks")
+}
+
 model Task {
   id          String   @id @default(uuid())
   description String
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now())
+
+  idProject   String
+  project     Project  @relation("ProjectTasks", fields: [idProject], references: [id], onDelete: Cascade)
 }
