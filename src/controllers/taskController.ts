@@ -37,12 +37,17 @@ export async function getAllTasksController(req: Request, res: Response<Task[] |
  *             type: object
  *             required:
  *               - description
+ *               - idProject
  *             properties:
  *               description:
+ *                 type: string
+ *               idProject:
  *                 type: string
  *     responses:
  *       201:
  *         description: Task created
+ *       400:
+ *        description: Bad request, missing required fields
  */
 export async function createTaskController(req: Request<{}, {}, Pick<Task, 'description' | 'idProject'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
@@ -54,7 +59,11 @@ export async function createTaskController(req: Request<{}, {}, Pick<Task, 'desc
     const newTask = await taskService.createTask(description, idProject);
     res.status(201).json(newTask);
   } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to create task'  });
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+
+    const status = message === 'Project id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
   }
 }
 

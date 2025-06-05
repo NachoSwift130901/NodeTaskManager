@@ -34,6 +34,14 @@ export async function getTasks(): Promise<Task[]> {
 
 export async function createTask(description: string, idProject: string): Promise<Task> {
   try {
+    // Check if the project exists before creating the task
+    const project = await prisma.project.findUnique({
+      where: { id: idProject },
+    });
+    if (!project) {
+      throw new Error('Project id does not exist');
+    }
+    
     const createdTask = await prisma.task.create({
       data: {
       description,
@@ -43,6 +51,9 @@ export async function createTask(description: string, idProject: string): Promis
     return createdTask;
   } catch (error) {
     console.error('Failed to create task:', error);
+    if (error instanceof Error && error.message === 'Project id does not exist') {
+      throw error;
+    }
     throw new Error('Database operation failed');
   }
 }
