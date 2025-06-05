@@ -86,16 +86,23 @@ export async function createTaskController(req: Request<{}, {}, Pick<Task, 'desc
  *       404:
  *         description: Tarea not completed
  */
-export function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
+export async function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<Task | void> {
   try {
-    const task = taskService.markTaskDone(req.params.id);
+    if (!req.params.id) {
+      res.status(400).json({ error: 'Task ID is required' });
+      return;
+    }
+    const task = await taskService.markTaskDone(req.params.id);
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
     }
     res.json(task);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update task' });
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+    const status = message === 'Task id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
   }
 }
 
@@ -118,15 +125,18 @@ export function markTaskDoneController(req: Request<{ id: string }>, res: Respon
  *       404:
  *         description: Task not found
  */
-export function deleteTaskController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
+export async function deleteTaskController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    const deleted = taskService.removeTask(req.params.id);
+    const deleted = await taskService.deleteTask(req.params.id);
     if (!deleted) {
       res.status(404).json({ error: 'Task not found' });
       return;
     }
     res.json(deleted);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete task' });
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+    const status = message === 'Task id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
   }
 }

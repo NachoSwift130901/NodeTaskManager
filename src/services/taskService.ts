@@ -4,19 +4,7 @@ import path from 'path';
 import { Task } from '../models/task';
 import { PrismaClient } from '../generated/prisma';
 
-const filePath = path.join(__dirname, '..', 'tasks.json');
-
 const prisma = new PrismaClient()
-
-function loadTasks(): Task[] {
-  if (!fs.existsSync(filePath)) return [];
-  const data = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(data) as Task[];
-}
-
-function saveTasks(tasks: Task[]): void {
-  fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2));
-}
 
 export async function getTasks(): Promise<Task[]> {
   try {
@@ -41,12 +29,12 @@ export async function createTask(description: string, idProject: string): Promis
     if (!project) {
       throw new Error('Project id does not exist');
     }
-    
+
     const createdTask = await prisma.task.create({
       data: {
-      description,
-      idProject,
-    },
+        description,
+        idProject,
+      },
     });
     return createdTask;
   } catch (error) {
@@ -58,20 +46,39 @@ export async function createTask(description: string, idProject: string): Promis
   }
 }
 
-export function markTaskDone(id: string): Task | null {
-  const tasks = loadTasks();
-  const task = tasks.find(t => t.id === id);
-  if (!task) return null;
-  task.completed = true;
-  saveTasks(tasks);
-  return task;
+export async function markTaskDone(id: string): Promise<Task | null> {
+  const task = await prisma.task.findUnique({
+      where: { id: id },
+    });
+    if (!task) {
+      throw new Error('Task id does not exist');
+    }
+  try {
+    const taskDone = await prisma.task.update({
+      where: { id },
+      data: { completed: true },
+    });
+    return taskDone;
+  } catch (error) {
+    console.error('Failed to update task:', error);
+    throw new Error('Failed to update task');
+  }
 }
 
-export function removeTask(id: string): Task | null {
-  const tasks = loadTasks();
-  const index = tasks.findIndex(t => t.id === id);
-  if (index === -1) return null;
-  const deleted = tasks.splice(index, 1)[0];
-  saveTasks(tasks);
-  return deleted;
+export async function deleteTask(id: string): Promise<Task | null> {
+  const task = await prisma.task.findUnique({
+      where: { id: id },
+    });
+    if (!task) {
+      throw new Error('Task id does not exist');
+    }
+  try {
+    const deletedtask = await prisma.task.delete({
+      where: { id },
+    });
+    return deletedtask;
+  } catch (error) {
+    console.error('Failed to delete task:', error);
+    throw new Error('Failed to delete task');
+  }
 }
