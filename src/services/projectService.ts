@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { Project } from '../models/Project';
+import { Project } from '../models/project';
 
 
 const filePath = path.join(__dirname, '..', 'projects.json');

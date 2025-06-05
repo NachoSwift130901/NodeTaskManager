@@ -1,6 +1,6 @@
 import e, { Request, Response } from 'express';
 import * as projectService from '../services/projectService'
-import { Project } from '../models/Project';
+import { Project } from '../models/project';
 
 /**
  * @swagger

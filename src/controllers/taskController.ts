@@ -44,14 +44,14 @@ export async function getAllTasksController(req: Request, res: Response<Task[] |
  *       201:
  *         description: Task created
  */
-export async function createTaskController(req: Request<{}, {}, Pick<Task, 'description'>>, res: Response<Task | { error: string }>): Promise<void> {
+export async function createTaskController(req: Request<{}, {}, Pick<Task, 'description' | 'idProject'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    const { description } = req.body;
-    if (!description) {
-      res.status(400).json({ error: 'Description required' });
+    const { description, idProject } = req.body;
+    if (!description || !idProject) {
+      res.status(400).json({ error: 'Description and idProject are required' });
       return;
     }
-    const newTask = await taskService.createTask(description);
+    const newTask = await taskService.createTask(description, idProject);
     res.status(201).json(newTask);
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to create task'  });

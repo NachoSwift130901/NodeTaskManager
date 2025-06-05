@@ -32,22 +32,13 @@ export async function getTasks(): Promise<Task[]> {
   }
 }
 
-export async function createTask(description: string): Promise<Task> {
-  const newTask = {
-    id: Date.now().toString(),
-    description,
-    completed: false,
-    createdAt: new Date(),
-  };
-
+export async function createTask(description: string, idProject: string): Promise<Task> {
   try {
     const createdTask = await prisma.task.create({
       data: {
-        id: newTask.id,
-        description: newTask.description,
-        completed: newTask.completed,
-        createdAt: newTask.createdAt,
-      },
+      description,
+      idProject,
+    },
     });
     return createdTask;
   } catch (error) {
