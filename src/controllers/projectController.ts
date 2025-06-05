@@ -146,20 +146,26 @@ export async function updateProjectController(req: Request<{}, {}, Pick<Project,
  *          500: 
  *              description: Failed to delete project
  * */
-export function deleteProjectController(req: Request<{ id: string }>, res: Response<Project | { error: string }>) {
+
+export async function deleteProjectController(req: Request<{ id: string }>, res: Response<{ message: string } | { error: string }>) {
     const { id } = req.params;
     if (!id) {
         res.status(400).json({ error: 'Project ID is required' });
         return;
     }
+
     try {
-        const deletedProject = projectService.deleteProject(id);
-        if (!deletedProject) {
+        const project = await projectService.deleteProject(id);
+        if (!project) {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        res.json(deletedProject);
+        res.json({ message: 'Project deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete project' });
+        const message = error instanceof Error ? error.message : 'Database operation failed';
+
+        const status = message === 'Project id does not exist' ? 404 : 500;
+
+        res.status(status).json({ error: message });
     }
 }

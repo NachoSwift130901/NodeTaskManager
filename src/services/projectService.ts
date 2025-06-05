@@ -52,10 +52,10 @@ export async function updateProject(id: string, name: string): Promise<Project |
 
     // Check if the project exists before creating the task
     const project = await prisma.project.findUnique({
-      where: { id: id },
+        where: { id: id },
     });
     if (!project) {
-      throw new Error('Project id does not exist');
+        throw new Error('Project id does not exist');
     }
     try {
         const updatedProject = await prisma.project.update({
@@ -69,11 +69,23 @@ export async function updateProject(id: string, name: string): Promise<Project |
     }
 }
 
-export function deleteProject(id: string): Project | null {
-    const projects = loadProjects();
-    const index = projects.findIndex(p => p.id === id);
-    if (index === -1) return null;
-    const deletedProject = projects.splice(index, 1)[0];
-    saveProjects(projects);
-    return deletedProject;
+export async function deleteProject(id: string): Promise<Project | null> {
+    try {
+        const project = await prisma.project.findUnique({
+            where: { id: id },
+        });
+        if (!project) {
+            throw new Error('Project id does not exist');
+        }
+        const deletedProject = await prisma.project.delete({
+            where: { id },
+        });
+        return deletedProject;
+    } catch (error) {
+        console.error('Failed to delete project:', error);
+        if (error instanceof Error && error.message === 'Project id does not exist') {
+            throw error; 
+        }
+        throw new Error('Database operation failed'); // Only for unexpected errors
+    }
 }
