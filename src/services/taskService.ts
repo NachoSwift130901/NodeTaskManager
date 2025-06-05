@@ -65,6 +65,25 @@ export async function markTaskDone(id: string): Promise<Task | null> {
   }
 }
 
+export async function markTaskNotDone(id: string): Promise<Task | null> {
+  const task = await prisma.task.findUnique({
+      where: { id: id },
+    });
+    if (!task) {
+      throw new Error('Task id does not exist');
+    }
+  try {
+    const taskDone = await prisma.task.update({
+      where: { id },
+      data: { completed: false },
+    });
+    return taskDone;
+  } catch (error) {
+    console.error('Failed to update task:', error);
+    throw new Error('Failed to update task');
+  }
+}
+
 export async function deleteTask(id: string): Promise<Task | null> {
   const task = await prisma.task.findUnique({
       where: { id: id },

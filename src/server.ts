@@ -8,6 +8,7 @@ import {
   createTaskController,
   markTaskDoneController,
   deleteTaskController,
+  markTaskNotDoneController,
 } from './controllers/taskController';
 
 import {
@@ -29,7 +30,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.get('/tasks', getAllTasksController)
 app.post('/tasks', createTaskController)
-app.put('/tasks/:id', markTaskDoneController)
+app.put('/tasks/mark-done/:id', markTaskDoneController)
+app.put('/tasks/mark-not-done/:id', markTaskNotDoneController)
 app.delete('/tasks/:id', deleteTaskController)
 
 app.get('/projects', getProjectsController)

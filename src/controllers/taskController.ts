@@ -69,7 +69,7 @@ export async function createTaskController(req: Request<{}, {}, Pick<Task, 'desc
 
 /**
  * @swagger
- * /tasks/{id}:
+ * /tasks/mark-done/{id}:
  *   put:
  *     summary: Mark task completed
  *     tags:
@@ -86,13 +86,52 @@ export async function createTaskController(req: Request<{}, {}, Pick<Task, 'desc
  *       404:
  *         description: Tarea not completed
  */
-export async function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<Task | void> {
+export async function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
   try {
     if (!req.params.id) {
       res.status(400).json({ error: 'Task ID is required' });
       return;
     }
     const task = await taskService.markTaskDone(req.params.id);
+    if (!task) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+    res.json(task);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+    const status = message === 'Task id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
+  }
+}
+
+/**
+ * @swagger
+ * /tasks/mark-not-done/{id}:
+ *   put:
+ *     summary: Mark task not completed
+ *     tags:
+ *     - Tasks
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Task marked as not done
+ *       404:
+ *         description: Task not found
+ */
+export async function markTaskNotDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
+  try {
+    if (!req.params.id) {
+      res.status(400).json({ error: 'Task ID is required' });
+      return;
+    }
+    const task = await taskService.markTaskNotDone(req.params.id);
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
