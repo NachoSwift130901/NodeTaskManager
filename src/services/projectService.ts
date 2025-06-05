@@ -1,56 +1,77 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { Project } from '../models/Project';
+import { Project } from '../models/project';
+import { PrismaClient } from '../generated/prisma';
 
+const prisma = new PrismaClient()
 
-const filePath = path.join(__dirname, '..', 'projects.json');
-
-function loadProjects(): Project[] {
-  if (!fs.existsSync(filePath)) return [];
-  const data = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(data) as Project[];
+export async function getProjects(): Promise<Project[]> {
+    try {
+        const projects = await prisma.project.findMany({
+            orderBy: {
+                name: 'asc', // Optional: sort by name alphabetically
+            },
+        });
+        return projects;
+    } catch (error) {
+        console.error('Failed to fetch projects:', error);
+        throw new Error('Failed to fetch projects from database');
+    }
 }
 
-function saveProjects(projects: Project[]): void {
-    fs.writeFileSync(filePath, JSON.stringify(projects, null, 2))
+export async function addProject(project: string): Promise<Project> {
+    try {
+        const createdProject = await prisma.project.create({
+            data: {
+                name: project,
+            },
+        });
+        return createdProject;
+    } catch (error) {
+        console.error('Failed to create project:', error);
+        throw new Error('Database operation failed');
+    }
 }
 
+export async function updateProject(id: string, name: string): Promise<Project | null> {
 
-export function getProjects(): Project[] {
-    return loadProjects()
+    // Check if the project exists before creating the task
+    const project = await prisma.project.findUnique({
+        where: { id: id },
+    });
+    if (!project) {
+        throw new Error('Project id does not exist');
+    }
+    try {
+        const updatedProject = await prisma.project.update({
+            where: { id },
+            data: { name: name },
+        });
+        return updatedProject;
+    } catch (error) {
+        console.error('Failed to update project:', error);
+        throw new Error('Database operation failed');
+    }
 }
 
-export function addProject(project: string): Project {
-    const projects = loadProjects();
-    const newProject: Project = {
-        name: project,
-        id: Date.now().toString() // Generate a unique ID based on timestamp
-    };
-    projects.push(newProject);
-    saveProjects(projects);
-    return newProject;
-}
-
-export function getProjectById(id: string): Project | null {
-    const projects = loadProjects();
-    return projects.find(p => p.id === id) || null;
-}
-
-export function updateProject(updatedProject: Project): Project | null {
-    const projects = loadProjects();
-    const index = projects.findIndex(p => p.id === updatedProject.id);
-    if (index === -1) return null;
-    projects[index] = { ...projects[index], ...updatedProject };
-    saveProjects(projects);
-    return projects[index];
-}
-
-export function deleteProject(id: string): Project | null {
-    const projects = loadProjects();
-    const index = projects.findIndex(p => p.id === id);
-    if (index === -1) return null;
-    const deletedProject = projects.splice(index, 1)[0];
-    saveProjects(projects);
-    return deletedProject;
+export async function deleteProject(id: string): Promise<Project | null> {
+    try {
+        const project = await prisma.project.findUnique({
+            where: { id: id },
+        });
+        if (!project) {
+            throw new Error('Project id does not exist');
+        }
+        const deletedProject = await prisma.project.delete({
+            where: { id },
+        });
+        return deletedProject;
+    } catch (error) {
+        console.error('Failed to delete project:', error);
+        if (error instanceof Error && error.message === 'Project id does not exist') {
+            throw error; 
+        }
+        throw new Error('Database operation failed'); // Only for unexpected errors
+    }
 }
