@@ -4,21 +4,7 @@ import path from 'path';
 import { Project } from '../models/project';
 import { PrismaClient } from '../generated/prisma';
 
-
-const filePath = path.join(__dirname, '..', 'projects.json');
-
 const prisma = new PrismaClient()
-
-function loadProjects(): Project[] {
-    if (!fs.existsSync(filePath)) return [];
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data) as Project[];
-}
-
-function saveProjects(projects: Project[]): void {
-    fs.writeFileSync(filePath, JSON.stringify(projects, null, 2))
-}
-
 
 export async function getProjects(): Promise<Project[]> {
     try {
