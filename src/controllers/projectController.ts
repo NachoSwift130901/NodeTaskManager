@@ -103,23 +103,25 @@ export async function createProjectController(req: Request<{}, {}, Pick<Project,
  *       500:
  *         description: Failed to update project
  */
-export function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' | 'name'>>, res: Response<Project | { error: string }>): void {
+export async function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' | 'name'>>, res: Response<Project | { error: string }>): Promise<void> {
     const { id, name } = req.body;
     if (!id || !name) {
         res.status(400).json({ error: 'Project ID and name are required' })
         return
     }
-    const updatedProject: Project = { id, name, };
 
     try {
-        const project = projectService.updateProject(updatedProject);
+        const project = await projectService.updateProject(id, name);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
         res.json(project);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update project' });
+        const message = error instanceof Error ? error.message : 'Database operation failed';
+        const status = message === 'Project id does not exist' ? 400 : 500;
+
+        res.status(status).json({ error: message });
     }
 }
 

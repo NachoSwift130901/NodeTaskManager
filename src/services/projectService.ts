@@ -48,18 +48,25 @@ export async function addProject(project: string): Promise<Project> {
     }
 }
 
-export function getProjectById(id: string): Project | null {
-    const projects = loadProjects();
-    return projects.find(p => p.id === id) || null;
-}
+export async function updateProject(id: string, name: string): Promise<Project | null> {
 
-export function updateProject(updatedProject: Project): Project | null {
-    const projects = loadProjects();
-    const index = projects.findIndex(p => p.id === updatedProject.id);
-    if (index === -1) return null;
-    projects[index] = { ...projects[index], ...updatedProject };
-    saveProjects(projects);
-    return projects[index];
+    // Check if the project exists before creating the task
+    const project = await prisma.project.findUnique({
+      where: { id: id },
+    });
+    if (!project) {
+      throw new Error('Project id does not exist');
+    }
+    try {
+        const updatedProject = await prisma.project.update({
+            where: { id },
+            data: { name: name },
+        });
+        return updatedProject;
+    } catch (error) {
+        console.error('Failed to update project:', error);
+        throw new Error('Database operation failed');
+    }
 }
 
 export function deleteProject(id: string): Project | null {
