@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as taskService from '../services/taskService';
-import { Task } from '../models/types';
+import { Task } from '../models/task';
 
 /**
  * @swagger
@@ -13,9 +13,9 @@ import { Task } from '../models/types';
  *       200:
  *         description: Task list
  */
-export function getAllTasksController(req: Request, res: Response<Task[] | { error: string }>): void {
+export async function getAllTasksController(req: Request, res: Response<Task[] | { error: string }>): Promise<void> {
   try {
-    const tasks = taskService.getTasks();
+    const tasks = await taskService.getTasks();
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: 'Failed to load tasks' });
@@ -37,30 +37,39 @@ export function getAllTasksController(req: Request, res: Response<Task[] | { err
  *             type: object
  *             required:
  *               - description
+ *               - idProject
  *             properties:
  *               description:
+ *                 type: string
+ *               idProject:
  *                 type: string
  *     responses:
  *       201:
  *         description: Task created
+ *       400:
+ *        description: Bad request, missing required fields
  */
-export function createTaskController(req: Request<{}, {}, Pick<Task, 'description'>>, res: Response<Task | { error: string }>): void {
+export async function createTaskController(req: Request<{}, {}, Pick<Task, 'description' | 'idProject'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    const { description } = req.body;
-    if (!description) {
-      res.status(400).json({ error: 'Descripción requerida' });
+    const { description, idProject } = req.body;
+    if (!description || !idProject) {
+      res.status(400).json({ error: 'Description and idProject are required' });
       return;
     }
-    const newTask = taskService.createTask(description);
+    const newTask = await taskService.createTask(description, idProject);
     res.status(201).json(newTask);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create task' });
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+
+    const status = message === 'Project id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
   }
 }
 
 /**
  * @swagger
- * /tasks/{id}:
+ * /tasks/mark-done/{id}:
  *   put:
  *     summary: Mark task completed
  *     tags:
@@ -77,16 +86,62 @@ export function createTaskController(req: Request<{}, {}, Pick<Task, 'descriptio
  *       404:
  *         description: Tarea not completed
  */
-export function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
+export async function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    const task = taskService.markTaskDone(req.params.id);
+    if (!req.params.id) {
+      res.status(400).json({ error: 'Task ID is required' });
+      return;
+    }
+    const task = await taskService.markTaskDone(req.params.id);
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
     }
     res.json(task);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update task' });
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+    const status = message === 'Task id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
+  }
+}
+
+/**
+ * @swagger
+ * /tasks/mark-not-done/{id}:
+ *   put:
+ *     summary: Mark task not completed
+ *     tags:
+ *     - Tasks
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Task marked as not done
+ *       404:
+ *         description: Task not found
+ */
+export async function markTaskNotDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
+  try {
+    if (!req.params.id) {
+      res.status(400).json({ error: 'Task ID is required' });
+      return;
+    }
+    const task = await taskService.markTaskNotDone(req.params.id);
+    if (!task) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+    res.json(task);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+    const status = message === 'Task id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
   }
 }
 
@@ -109,15 +164,18 @@ export function markTaskDoneController(req: Request<{ id: string }>, res: Respon
  *       404:
  *         description: Task not found
  */
-export function deleteTaskController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): void {
+export async function deleteTaskController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    const deleted = taskService.removeTask(req.params.id);
+    const deleted = await taskService.deleteTask(req.params.id);
     if (!deleted) {
       res.status(404).json({ error: 'Task not found' });
       return;
     }
     res.json(deleted);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete task' });
+    const message = error instanceof Error ? error.message : 'Database operation failed';
+    const status = message === 'Task id does not exist' ? 400 : 500;
+
+    res.status(status).json({ error: message });
   }
 }

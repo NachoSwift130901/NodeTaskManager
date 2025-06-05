@@ -1,6 +1,6 @@
 import e, { Request, Response } from 'express';
 import * as projectService from '../services/projectService'
-import { Project } from '../models/Project';
+import { Project } from '../models/project';
 
 /**
  * @swagger
@@ -16,8 +16,6 @@ import { Project } from '../models/Project';
  *           application/json:
  *             schema:
  *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Project'
  *       500:
  *         description: Failed to load projects
  *         content:
@@ -28,9 +26,9 @@ import { Project } from '../models/Project';
  *                 error:
  *                   type: string
  */
-export function getProjectsController(req: Request, res: Response<Project[] | { error: string }>) {
+export async function getProjectsController(req: Request, res: Response<Project[] | { error: string }>) {
     try {
-        const projects = projectService.getProjects()
+        const projects = await projectService.getProjects()
         res.json(projects)
     } catch (error) {
         res.status(500).json({ error: 'Failed to load projects' });
@@ -59,14 +57,14 @@ export function getProjectsController(req: Request, res: Response<Project[] | { 
  *       201:
  *         name: Project created
  */
-export function createProjectController(req: Request<{}, {}, Pick<Project, 'name'>>, res: Response<Project | { error: string }>) {
+export async function createProjectController(req: Request<{}, {}, Pick<Project, 'name'>>, res: Response<Project | { error: string }>) {
     try {
         const { name } = req.body;
         if (!name) {
             res.status(400).json({ error: 'Project name is required' });
             return;
         }
-        const newProject = projectService.addProject(name);
+        const newProject = await projectService.addProject(name);
         res.status(201).json(newProject);
     } catch (error) {
         res.status(500).json({ error: 'Failed to create project' });
@@ -103,23 +101,25 @@ export function createProjectController(req: Request<{}, {}, Pick<Project, 'name
  *       500:
  *         description: Failed to update project
  */
-export function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' | 'name'>>, res: Response<Project | { error: string }>): void {
+export async function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' | 'name'>>, res: Response<Project | { error: string }>): Promise<void> {
     const { id, name } = req.body;
     if (!id || !name) {
         res.status(400).json({ error: 'Project ID and name are required' })
         return
     }
-    const updatedProject: Project = { id, name, };
 
     try {
-        const project = projectService.updateProject(updatedProject);
+        const project = await projectService.updateProject(id, name);
         if (!project) {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
         res.json(project);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update project' });
+        const message = error instanceof Error ? error.message : 'Database operation failed';
+        const status = message === 'Project id does not exist' ? 400 : 500;
+
+        res.status(status).json({ error: message });
     }
 }
 
@@ -144,20 +144,26 @@ export function updateProjectController(req: Request<{}, {}, Pick<Project, 'id' 
  *          500: 
  *              description: Failed to delete project
  * */
-export function deleteProjectController(req: Request<{ id: string }>, res: Response<Project | { error: string }>) {
+
+export async function deleteProjectController(req: Request<{ id: string }>, res: Response<{ message: string } | { error: string }>) {
     const { id } = req.params;
     if (!id) {
         res.status(400).json({ error: 'Project ID is required' });
         return;
     }
+
     try {
-        const deletedProject = projectService.deleteProject(id);
-        if (!deletedProject) {
+        const project = await projectService.deleteProject(id);
+        if (!project) {
             res.status(404).json({ error: 'Project not found' });
             return;
         }
-        res.json(deletedProject);
+        res.json({ message: 'Project deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete project' });
+        const message = error instanceof Error ? error.message : 'Database operation failed';
+
+        const status = message === 'Project id does not exist' ? 404 : 500;
+
+        res.status(status).json({ error: message });
     }
 }
