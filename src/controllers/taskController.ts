@@ -4,7 +4,7 @@ import { Task } from '../models/task';
 
 /**
  * @swagger
- * /tasks:
+ * /api/tasks:
  *   get:
  *     summary: Get all tasks
  *     tags:
@@ -24,7 +24,7 @@ export async function getAllTasksController(req: Request, res: Response<Task[] |
 
 /**
  * @swagger
- * /tasks:
+ * /api/tasks:
  *   post:
  *     summary: Create a new task
  *     tags:
@@ -69,7 +69,7 @@ export async function createTaskController(req: Request<{}, {}, Pick<Task, 'desc
 
 /**
  * @swagger
- * /tasks/mark-done/{id}:
+ * /api/tasks/mark-done/{id}:
  *   put:
  *     summary: Mark task completed
  *     tags:
@@ -108,7 +108,7 @@ export async function markTaskDoneController(req: Request<{ id: string }>, res: 
 
 /**
  * @swagger
- * /tasks/mark-not-done/{id}:
+ * /api/tasks/mark-not-done/{id}:
  *   put:
  *     summary: Mark task not completed
  *     tags:
@@ -147,7 +147,7 @@ export async function markTaskNotDoneController(req: Request<{ id: string }>, re
 
 /**
  * @swagger
- * /tasks/{id}:
+ * /api/tasks/{id}:
  *   delete:
  *     summary: Delete task
  *     tags:
