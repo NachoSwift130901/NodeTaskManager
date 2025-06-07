@@ -4,7 +4,7 @@ import { Project } from '../models/project';
 
 /**
  * @swagger
- * /projects:
+ * /api/projects:
  *   get:
  *     summary: Retrieve a list of projects
  *     tags:
@@ -37,7 +37,7 @@ export async function getProjectsController(req: Request, res: Response<Project[
 
 /**
  * @swagger
- * /projects:
+ * /api/projects:
  *   post:
  *     summary: Create a new project
  *     tags:
@@ -73,7 +73,7 @@ export async function createProjectController(req: Request<{}, {}, Pick<Project,
 
 /**
  * @swagger
- * /projects:
+ * /api/projects:
  *   put:
  *     summary: Update an existing project
  *     tags:
@@ -126,7 +126,7 @@ export async function updateProjectController(req: Request<{}, {}, Pick<Project,
 
 /**
  *  @swagger
- * /projects/{id}:
+ * /api/projects/{id}:
  *   delete:
  *      summary: Delete a project by ID
  *      tags:

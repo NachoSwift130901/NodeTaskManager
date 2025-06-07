@@ -25,19 +25,24 @@ const PORT = 3000
 app.use(express.json());
 app.use(cors());
 
+const apiRouter = express.Router();
+
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.get('/tasks', getAllTasksController)
-app.post('/tasks', createTaskController)
-app.put('/tasks/mark-done/:id', markTaskDoneController)
-app.put('/tasks/mark-not-done/:id', markTaskNotDoneController)
-app.delete('/tasks/:id', deleteTaskController)
 
-app.get('/projects', getProjectsController)
-app.post('/projects', createProjectController)
-app.put('/projects', updateProjectController)
-app.delete('/projects/:id', deleteProjectController)
+apiRouter.get('/tasks', getAllTasksController)
+apiRouter.post('/tasks', createTaskController)
+apiRouter.put('/tasks/mark-done/:id', markTaskDoneController)
+apiRouter.put('/tasks/mark-not-done/:id', markTaskNotDoneController)
+apiRouter.delete('/tasks/:id', deleteTaskController)
+
+apiRouter.get('/projects', getProjectsController)
+apiRouter.post('/projects', createProjectController)
+apiRouter.put('/projects', updateProjectController)
+apiRouter.delete('/projects/:id', deleteProjectController)
+
+app.use('/api', apiRouter);
 
 const errorHandler: express.ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof SyntaxError && 'body' in err) {
