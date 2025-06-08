@@ -33,14 +33,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 apiRouter.get('/tasks/getTasks', getAllTasksController)
 apiRouter.post('/tasks/addTask', createTaskController)
-apiRouter.put('/tasks/mark-done/:id', markTaskDoneController)
-apiRouter.put('/tasks/mark-not-done/:id', markTaskNotDoneController)
-apiRouter.delete('/tasks/delete/:id', deleteTaskController)
+apiRouter.put('/tasks/mark-done', markTaskDoneController)
+apiRouter.put('/tasks/mark-not-done', markTaskNotDoneController)
+apiRouter.delete('/tasks/delete', deleteTaskController)
 
 apiRouter.get('/projects/getProjects', getProjectsController)
 apiRouter.post('/projects/addProject', createProjectController)
 apiRouter.put('/projects/updateProject', updateProjectController)
-apiRouter.delete('/projects/deleteProject/:id', deleteProjectController)
+apiRouter.delete('/projects/deleteProject', deleteProjectController)
 
 app.use('/api', apiRouter);
 
