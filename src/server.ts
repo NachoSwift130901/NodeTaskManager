@@ -31,16 +31,16 @@ const apiRouter = express.Router();
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 
-apiRouter.get('/tasks', getAllTasksController)
-apiRouter.post('/tasks', createTaskController)
+apiRouter.get('/tasks/getTasks', getAllTasksController)
+apiRouter.post('/tasks/addTask', createTaskController)
 apiRouter.put('/tasks/mark-done/:id', markTaskDoneController)
 apiRouter.put('/tasks/mark-not-done/:id', markTaskNotDoneController)
-apiRouter.delete('/tasks/:id', deleteTaskController)
+apiRouter.delete('/tasks/delete/:id', deleteTaskController)
 
-apiRouter.get('/projects', getProjectsController)
-apiRouter.post('/projects', createProjectController)
-apiRouter.put('/projects', updateProjectController)
-apiRouter.delete('/projects/:id', deleteProjectController)
+apiRouter.get('/projects/getProjects', getProjectsController)
+apiRouter.post('/projects/addProject', createProjectController)
+apiRouter.put('/projects/updateProject', updateProjectController)
+apiRouter.delete('/projects/deleteProject/:id', deleteProjectController)
 
 app.use('/api', apiRouter);
 
