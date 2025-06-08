@@ -69,30 +69,35 @@ export async function createTaskController(req: Request<{}, {}, Pick<Task, 'desc
 
 /**
  * @swagger
- * /api/tasks/mark-done/{id}:
+ * /api/tasks/mark-done:
  *   put:
  *     summary: Mark task completed
  *     tags:
- *     - Tasks
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
+ *       - Tasks
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Task completed
  *       404:
  *         description: Tarea not completed
  */
-export async function markTaskDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
+export async function markTaskDoneController(req: Request<{}, {}, Pick<Task, 'id'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    if (!req.params.id) {
+    if (!req.body.id) {
       res.status(400).json({ error: 'Task ID is required' });
       return;
     }
-    const task = await taskService.markTaskDone(req.params.id);
+    const task = await taskService.markTaskDone(req.body.id);
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
@@ -108,30 +113,35 @@ export async function markTaskDoneController(req: Request<{ id: string }>, res: 
 
 /**
  * @swagger
- * /api/tasks/mark-not-done/{id}:
+ * /api/tasks/mark-not-done:
  *   put:
  *     summary: Mark task not completed
  *     tags:
  *     - Tasks
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Task marked as not done
  *       404:
  *         description: Task not found
  */
-export async function markTaskNotDoneController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
+export async function markTaskNotDoneController(req:Request<{}, {}, Pick<Task, 'id'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    if (!req.params.id) {
+    if (!req.body.id) {
       res.status(400).json({ error: 'Task ID is required' });
       return;
     }
-    const task = await taskService.markTaskNotDone(req.params.id);
+    const task = await taskService.markTaskNotDone(req.body.id);
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
@@ -147,26 +157,31 @@ export async function markTaskNotDoneController(req: Request<{ id: string }>, re
 
 /**
  * @swagger
- * /api/tasks/delete/{id}:
+ * /api/tasks/delete:
  *   delete:
  *     summary: Delete task
  *     tags:
  *     - Tasks
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Task deleted
  *       404:
  *         description: Task not found
  */
-export async function deleteTaskController(req: Request<{ id: string }>, res: Response<Task | { error: string }>): Promise<void> {
+export async function deleteTaskController(req: Request<{}, {}, Pick<Task, 'id'>>, res: Response<Task | { error: string }>): Promise<void> {
   try {
-    const deleted = await taskService.deleteTask(req.params.id);
+    const deleted = await taskService.deleteTask(req.body.id);
     if (!deleted) {
       res.status(404).json({ error: 'Task not found' });
       return;
