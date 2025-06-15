@@ -40,7 +40,7 @@ apiRouter.delete('/tasks/delete', deleteTaskController)
 apiRouter.get('/projects/getProjects', getProjectsController)
 apiRouter.post('/projects/addProject', createProjectController)
 apiRouter.put('/projects/updateProject', updateProjectController)
-apiRouter.delete('/projects/deleteProject', deleteProjectController)
+apiRouter.delete('/projects/deleteProject/:id', deleteProjectController)
 
 app.use('/api', apiRouter);
 
